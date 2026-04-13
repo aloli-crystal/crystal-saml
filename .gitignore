@@ -1,0 +1,8 @@
+/docs/
+/lib/
+/bin/
+!/bin/crystal-saml
+/.shards/
+*.dwarf
+*.o
+/crystal-saml

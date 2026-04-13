@@ -1,0 +1,193 @@
+= Crystal SAML
+:toc: macro
+:toclevels: 3
+
+Boite a outils SAML v2 pour Crystal. Ajoutez le Single Sign-On (SSO) a vos applications Crystal.
+
+Portage du gem https://github.com/SAML-Toolkits/ruby-saml[ruby-saml] (v1.18.1).
+Compatible avec tout framework web Crystal (Kemal, Lucky, Marten, etc.).
+
+toc::[]
+
+== Installation
+
+Ajoutez la dependance dans votre `shard.yml` :
+
+[source,yaml]
+----
+dependencies:
+  crystal-saml:
+    github: aloli-crystal/crystal-saml
+    version: ~> 1.18.1
+----
+
+Lancez `shards install`.
+
+== Demarrage rapide
+
+[source,crystal]
+----
+require "kemal"
+require "crystal-saml"
+
+settings = CrystalSaml::Settings.new
+settings.idp_sso_service_url = "https://idp.example.com/sso"
+settings.idp_cert = File.read("idp.pem")
+settings.sp_entity_id = "https://myapp.com"
+settings.assertion_consumer_service_url = "https://myapp.com/saml/callback"
+
+get "/saml/login" do |env|
+  request = CrystalSaml::AuthRequest.new(settings)
+  env.redirect request.redirect_url
+end
+
+post "/saml/callback" do |env|
+  response = CrystalSaml::Response.new(settings, env.params.body["SAMLResponse"])
+  if response.valid?
+    user_email = response.name_id
+    attributes = response.attributes
+    env.session.string("user", user_email)
+    env.redirect "/"
+  else
+    halt env, status_code: 401, response: "Erreur SAML : #{response.errors.join(", ")}"
+  end
+end
+
+get "/saml/metadata" do |env|
+  env.response.content_type = "application/xml"
+  settings.sp_metadata
+end
+----
+
+== Configuration
+
+=== Parametres du fournisseur d'identite (IdP)
+
+[cols="1,3"]
+|===
+| Propriete | Description
+
+| `idp_entity_id` | L'EntityID du fournisseur d'identite
+| `idp_sso_service_url` | URL de connexion du IdP (point d'entree SSO)
+| `idp_slo_service_url` | URL de deconnexion du IdP (point d'entree SLO, optionnel)
+| `idp_cert` | Certificat X.509 du IdP au format PEM
+| `idp_cert_fingerprint` | Alternative a `idp_cert` : empreinte du certificat
+| `idp_cert_fingerprint_algorithm` | Algorithme d'empreinte : `sha1`, `sha256` (defaut : `sha256`)
+|===
+
+=== Parametres du fournisseur de service (SP)
+
+[cols="1,3"]
+|===
+| Propriete | Description
+
+| `sp_entity_id` | L'EntityID de votre application (generalement l'URL de l'app)
+| `assertion_consumer_service_url` | URL de callback SAML (recoit la reponse SAML)
+| `single_logout_service_url` | URL de callback de deconnexion (optionnel)
+| `name_identifier_format` | Format du NameID (defaut : email)
+|===
+
+=== Parametres de securite
+
+[cols="1,3"]
+|===
+| Propriete | Description
+
+| `security_authn_requests_signed` | Signer les AuthnRequests (defaut : `false`)
+| `security_want_assertions_signed` | Exiger des assertions signees (defaut : `true`)
+| `security_signature_method` | Algorithme de signature (defaut : RSA-SHA256)
+| `certificate` | Certificat SP pour la signature (format PEM)
+| `private_key` | Cle privee SP pour la signature (format PEM)
+|===
+
+== Fonctionnalites
+
+=== AuthnRequest (Connexion)
+
+Construire une requete d'authentification SAML et rediriger l'utilisateur vers le IdP :
+
+[source,crystal]
+----
+request = CrystalSaml::AuthRequest.new(settings)
+
+# Liaison HTTP-Redirect (GET)
+redirect_url = request.redirect_url(relay_state: "/tableau-de-bord")
+
+# Liaison HTTP-POST
+html_form = request.post_form(relay_state: "/tableau-de-bord")
+----
+
+=== Analyse de la reponse (Callback)
+
+Analyser et valider la reponse SAML du IdP :
+
+[source,crystal]
+----
+response = CrystalSaml::Response.new(settings, params["SAMLResponse"])
+
+if response.valid?
+  name_id = response.name_id           # Identifiant utilisateur (email)
+  attrs = response.attributes           # Hash(String, Array(String))
+  session = response.session_index      # Identifiant de session
+end
+----
+
+=== Deconnexion unique (SLO)
+
+Initier la deconnexion :
+
+[source,crystal]
+----
+logout = CrystalSaml::LogoutRequest.new(settings, user_name_id, user_session_index)
+redirect_url = logout.redirect_url
+----
+
+Gerer la reponse de deconnexion :
+
+[source,crystal]
+----
+logout_response = CrystalSaml::LogoutResponse.new(settings, params["SAMLResponse"])
+if logout_response.valid?
+  # L'utilisateur est deconnecte
+end
+----
+
+=== Metadonnees SP
+
+Generer le XML de metadonnees pour l'enregistrement aupres du IdP :
+
+[source,crystal]
+----
+metadata_xml = settings.sp_metadata
+----
+
+=== Outil en ligne de commande
+
+[source,bash]
+----
+# Generer les metadonnees SP
+crystal-saml metadata --config settings.yml
+
+# Decoder une reponse SAML encodee en Base64 (debogage)
+crystal-saml decode "PHNhbWxwOl..."
+----
+
+== Compatibilite
+
+Cette bibliotheque est independante de tout framework. Elle fonctionne avec :
+
+* *Kemal* -- framework web leger
+* *Lucky* -- framework web complet
+* *Marten* -- framework web inspire de Django
+* *Tout serveur HTTP Crystal* -- utilise uniquement la bibliotheque standard de Crystal
+
+Aucune dependance externe requise.
+
+== Projet amont
+
+Ceci est un portage de https://github.com/SAML-Toolkits/ruby-saml[ruby-saml] v1.18.1.
+L'API a ete adaptee aux conventions Crystal tout en maintenant la parite fonctionnelle pour les fonctionnalites principales.
+
+== Licence
+
+Licence MIT. Voir link:LICENSE[LICENSE].

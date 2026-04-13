@@ -1,0 +1,10 @@
+name: crystal-saml
+version: 1.18.1
+description: |
+  SAML v2 toolkit for Crystal. Add SSO to your Crystal applications.
+  Port of the ruby-saml gem (v1.18.1).
+  Works with any Crystal web framework (Kemal, Lucky, Marten, etc.).
+authors:
+  - Philippe Nénert <philippe@aloli.fr>
+license: MIT
+crystal: ">= 1.19.0"
