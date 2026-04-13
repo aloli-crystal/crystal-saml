@@ -1,0 +1,87 @@
+#!/usr/bin/env crystal
+require "../src/crystal_saml"
+require "yaml"
+require "option_parser"
+
+command = ""
+config_file = ""
+response_data = ""
+
+parser = OptionParser.new do |p|
+  p.banner = "Usage: crystal-saml <command> [options]"
+  p.separator ""
+  p.separator "Commands:"
+  p.separator "  metadata   Generate SP metadata XML"
+  p.separator "  decode     Decode and display a SAML response"
+  p.separator ""
+
+  p.on("metadata", "Generate SP metadata XML") do
+    command = "metadata"
+  end
+
+  p.on("decode", "Decode a Base64-encoded SAML response") do
+    command = "decode"
+  end
+
+  p.on("--config FILE", "Settings YAML file") do |file|
+    config_file = file
+  end
+
+  p.on("-h", "--help", "Show this help") do
+    puts p
+    exit
+  end
+
+  p.on("-v", "--version", "Show version") do
+    puts "crystal-saml #{CrystalSaml::VERSION} (ruby-saml upstream: #{CrystalSaml::UPSTREAM_VERSION})"
+    exit
+  end
+
+  p.unknown_args do |args|
+    response_data = args.first? || ""
+  end
+end
+
+parser.parse
+
+case command
+when "metadata"
+  if config_file.empty?
+    STDERR.puts "Error: --config FILE is required for metadata generation"
+    exit 1
+  end
+
+  yaml = YAML.parse(File.read(config_file))
+  settings = CrystalSaml::Settings.new
+  settings.sp_entity_id = yaml["sp_entity_id"]?.try(&.as_s) || ""
+  settings.assertion_consumer_service_url = yaml["assertion_consumer_service_url"]?.try(&.as_s) || ""
+  settings.single_logout_service_url = yaml["single_logout_service_url"]?.try(&.as_s) || ""
+  settings.name_identifier_format = yaml["name_identifier_format"]?.try(&.as_s) || settings.name_identifier_format
+  if cert_file = yaml["certificate_file"]?.try(&.as_s)
+    settings.certificate = File.read(cert_file) if File.exists?(cert_file)
+  end
+
+  puts settings.sp_metadata
+when "decode"
+  if response_data.empty?
+    # Try reading from stdin
+    response_data = STDIN.gets_to_end.strip
+  end
+
+  if response_data.empty?
+    STDERR.puts "Error: provide a Base64-encoded SAML response as argument or via stdin"
+    exit 1
+  end
+
+  begin
+    decoded = CrystalSaml::Utils.base64_decode(response_data)
+    # Pretty-print the XML would be nice, but just output it
+    puts decoded
+  rescue ex
+    STDERR.puts "Error decoding response: #{ex.message}"
+    exit 1
+  end
+else
+  puts parser
+  exit 1
+end
