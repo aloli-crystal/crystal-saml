@@ -1,0 +1,6 @@
+name: crystal-saml
+title: 'Crystal SAML'
+version: '1.18.1'
+nav:
+  - modules/ROOT/nav.adoc
+  - modules/fr/nav.adoc

@@ -1,0 +1,69 @@
+= Utilisation
+
+== Demarrage Rapide
+
+[source,crystal]
+----
+require "kemal"
+require "crystal-saml"
+
+settings = CrystalSaml::Settings.new
+settings.idp_sso_service_url = "https://idp.example.com/sso"
+settings.idp_cert = File.read("idp.pem")
+settings.sp_entity_id = "https://myapp.com"
+settings.assertion_consumer_service_url = "https://myapp.com/saml/callback"
+
+get "/saml/login" do |env|
+  request = CrystalSaml::AuthRequest.new(settings)
+  env.redirect request.redirect_url
+end
+
+post "/saml/callback" do |env|
+  response = CrystalSaml::Response.new(settings, env.params.body["SAMLResponse"])
+  if response.valid?
+    user_email = response.name_id
+    env.session.string("user", user_email)
+    env.redirect "/"
+  else
+    halt env, status_code: 401, response: "Erreur SAML : #{response.errors.join(", ")}"
+  end
+end
+
+get "/saml/metadata" do |env|
+  env.response.content_type = "application/xml"
+  settings.sp_metadata
+end
+----
+
+== Configuration
+
+=== Parametres du Fournisseur d'Identite (IdP)
+
+[cols="1,3"]
+|===
+| Propriete | Description
+
+| `idp_entity_id` | L'EntityID du fournisseur d'identite
+| `idp_sso_service_url` | URL de connexion du IdP
+| `idp_slo_service_url` | URL de deconnexion du IdP (optionnel)
+| `idp_cert` | Certificat X.509 du IdP au format PEM
+|===
+
+=== Parametres du Fournisseur de Service (SP)
+
+[cols="1,3"]
+|===
+| Propriete | Description
+
+| `sp_entity_id` | L'EntityID de votre application
+| `assertion_consumer_service_url` | URL de callback SAML
+| `single_logout_service_url` | URL de callback de deconnexion (optionnel)
+|===
+
+== CLI
+
+[source,bash]
+----
+crystal-saml metadata --config settings.yml
+crystal-saml decode "PHNhbWxwOl..."
+----

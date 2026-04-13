@@ -1,0 +1,20 @@
+= Crystal SAML
+
+SAML v2 toolkit for Crystal. Add Single Sign-On (SSO) to your Crystal applications. Port of the https://github.com/SAML-Toolkits/ruby-saml[ruby-saml] gem (v1.18.1). Works with any Crystal web framework (Kemal, Lucky, Marten, etc.).
+
+== Features
+
+* AuthnRequest (login) -- HTTP-Redirect and HTTP-POST bindings
+* Response parsing and validation
+* Single Logout (SLO)
+* SP Metadata generation
+* CLI tool for debugging
+* Framework-agnostic -- works with Kemal, Lucky, Marten, or any Crystal HTTP server
+
+== Compatibility
+
+No external dependencies required. Uses only Crystal stdlib.
+
+== License
+
+MIT

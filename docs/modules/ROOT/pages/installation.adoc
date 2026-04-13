@@ -1,0 +1,13 @@
+= Installation
+
+Add the dependency to your `shard.yml`:
+
+[source,yaml]
+----
+dependencies:
+  crystal-saml:
+    github: aloli-crystal/crystal-saml
+    version: ~> 1.18.1
+----
+
+Run `shards install`.

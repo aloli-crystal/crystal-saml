@@ -1,0 +1,109 @@
+= Usage
+
+== Quick Start
+
+[source,crystal]
+----
+require "kemal"
+require "crystal-saml"
+
+settings = CrystalSaml::Settings.new
+settings.idp_sso_service_url = "https://idp.example.com/sso"
+settings.idp_cert = File.read("idp.pem")
+settings.sp_entity_id = "https://myapp.com"
+settings.assertion_consumer_service_url = "https://myapp.com/saml/callback"
+
+get "/saml/login" do |env|
+  request = CrystalSaml::AuthRequest.new(settings)
+  env.redirect request.redirect_url
+end
+
+post "/saml/callback" do |env|
+  response = CrystalSaml::Response.new(settings, env.params.body["SAMLResponse"])
+  if response.valid?
+    user_email = response.name_id
+    attributes = response.attributes
+    env.session.string("user", user_email)
+    env.redirect "/"
+  else
+    halt env, status_code: 401, response: "SAML Error: #{response.errors.join(", ")}"
+  end
+end
+
+get "/saml/metadata" do |env|
+  env.response.content_type = "application/xml"
+  settings.sp_metadata
+end
+----
+
+== Configuration
+
+=== Identity Provider (IdP) Settings
+
+[cols="1,3"]
+|===
+| Property | Description
+
+| `idp_entity_id` | The EntityID of the IdP
+| `idp_sso_service_url` | IdP login URL (SSO endpoint)
+| `idp_slo_service_url` | IdP logout URL (SLO endpoint, optional)
+| `idp_cert` | IdP X.509 certificate in PEM format
+| `idp_cert_fingerprint` | Alternative to `idp_cert`: certificate fingerprint
+|===
+
+=== Service Provider (SP) Settings
+
+[cols="1,3"]
+|===
+| Property | Description
+
+| `sp_entity_id` | Your application's EntityID
+| `assertion_consumer_service_url` | Your SAML callback URL
+| `single_logout_service_url` | Your logout callback URL (optional)
+| `name_identifier_format` | NameID format (default: email)
+|===
+
+=== Security Settings
+
+[cols="1,3"]
+|===
+| Property | Description
+
+| `security_authn_requests_signed` | Sign AuthnRequests (default: `false`)
+| `security_want_assertions_signed` | Require signed assertions (default: `true`)
+| `security_signature_method` | Signature algorithm (default: RSA-SHA256)
+| `certificate` | SP certificate for signing (PEM format)
+| `private_key` | SP private key for signing (PEM format)
+|===
+
+== AuthnRequest (Login)
+
+[source,crystal]
+----
+request = CrystalSaml::AuthRequest.new(settings)
+redirect_url = request.redirect_url(relay_state: "/dashboard")
+html_form = request.post_form(relay_state: "/dashboard")
+----
+
+== Single Logout (SLO)
+
+[source,crystal]
+----
+logout = CrystalSaml::LogoutRequest.new(settings, user_name_id, user_session_index)
+redirect_url = logout.redirect_url
+----
+
+== SP Metadata
+
+[source,crystal]
+----
+metadata_xml = settings.sp_metadata
+----
+
+== CLI Tool
+
+[source,bash]
+----
+crystal-saml metadata --config settings.yml
+crystal-saml decode "PHNhbWxwOl..."
+----
