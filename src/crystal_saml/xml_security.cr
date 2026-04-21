@@ -63,7 +63,7 @@ module CrystalSaml
         end
 
         # Sort attributes: by name
-        sorted_attrs = attrs.sort_by { |name, _| name }
+        sorted_attrs = attrs.sort_by { |attr_name, _| attr_name }
 
         io << "<" << name
 
@@ -118,19 +118,19 @@ module CrystalSaml
         end
 
         # Include inclusive namespaces
-        inclusive_namespaces.each do |prefix|
-          next if ns_decls.has_key?(prefix)
+        inclusive_namespaces.each do |inc_prefix|
+          next if ns_decls.has_key?(inc_prefix)
           current = node
           while current
             if current.type.element_node?
               current.namespaces.each do |ns_name, ns_uri|
                 p = ns_name.starts_with?("xmlns:") ? ns_name[6..] : ""
-                if p == prefix && ns_uri && parent_ns[prefix]? != ns_uri
-                  ns_decls[prefix] = ns_uri
+                if p == inc_prefix && ns_uri && parent_ns[inc_prefix]? != ns_uri
+                  ns_decls[inc_prefix] = ns_uri
                 end
               end
             end
-            break if ns_decls.has_key?(prefix)
+            break if ns_decls.has_key?(inc_prefix)
             current = current.parent
           end
         end

@@ -30,5 +30,8 @@ jobs:
       - name: Run tests
         run: crystal spec
 
+      - name: Run linter
+        run: bin/ameba
+
       - name: Build CLI
         run: crystal build bin/crystal-saml -o crystal-saml-cli
