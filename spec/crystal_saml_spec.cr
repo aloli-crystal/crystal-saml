@@ -1,13 +1,19 @@
 require "./spec_helper"
+require "yaml"
 
 describe CrystalSaml do
   describe "VERSION" do
-    it "has a version number" do
-      CrystalSaml::VERSION.should eq "1.18.1"
+    it "VERSION matche shard.yml (compile-time read, pas de désynchro possible)" do
+      yml = YAML.parse(File.read(File.join(__DIR__, "..", "shard.yml")))
+      CrystalSaml::VERSION.should eq(yml["version"].as_s)
     end
 
-    it "has an upstream version" do
-      CrystalSaml::UPSTREAM_VERSION.should eq "1.18.1"
+    it "VERSION est au format de portage X.Y.Z[.W]" do
+      CrystalSaml::VERSION.should match(/^\d+\.\d+\.\d+(\.\d+)?$/)
+    end
+
+    it "UPSTREAM_VERSION = trois premiers composants de VERSION (convention de portage)" do
+      CrystalSaml::UPSTREAM_VERSION.should eq(CrystalSaml::VERSION.split(".")[0..2].join("."))
     end
   end
 end
