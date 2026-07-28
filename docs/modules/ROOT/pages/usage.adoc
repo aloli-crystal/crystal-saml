@@ -5,7 +5,7 @@
 [source,crystal]
 ----
 require "kemal"
-require "crystal-saml"
+require "saml"
 
 settings = CrystalSaml::Settings.new
 settings.idp_sso_service_url = "https://idp.example.com/sso"
@@ -104,6 +104,6 @@ metadata_xml = settings.sp_metadata
 
 [source,bash]
 ----
-crystal-saml metadata --config settings.yml
-crystal-saml decode "PHNhbWxwOl..."
+saml metadata --config settings.yml
+saml decode "PHNhbWxwOl..."
 ----

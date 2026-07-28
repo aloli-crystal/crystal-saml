@@ -16,9 +16,9 @@ Add the dependency to your `shard.yml`:
 [source,yaml]
 ----
 dependencies:
-  crystal-saml:
-    github: aloli-crystal/crystal-saml
-    version: ~> 1.18.1
+  saml:
+    github: aloli-crystal/saml
+    version: ~> 1.18.1.3
 ----
 
 Run `shards install`.
@@ -28,7 +28,7 @@ Run `shards install`.
 [source,crystal]
 ----
 require "kemal"
-require "crystal-saml"
+require "saml"
 
 settings = CrystalSaml::Settings.new
 settings.idp_sso_service_url = "https://idp.example.com/sso"
@@ -166,10 +166,10 @@ metadata_xml = settings.sp_metadata
 [source,bash]
 ----
 # Generate SP metadata
-crystal-saml metadata --config settings.yml
+saml metadata --config settings.yml
 
 # Decode a Base64 SAML response (debugging)
-crystal-saml decode "PHNhbWxwOl..."
+saml decode "PHNhbWxwOl..."
 ----
 
 == Compatibility

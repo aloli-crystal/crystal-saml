@@ -1,8 +1,8 @@
 /docs/api/
 /lib/
 /bin/*
-!/bin/crystal-saml
+!/bin/saml
 /.shards/
 *.dwarf
 *.o
-/crystal-saml
+/saml

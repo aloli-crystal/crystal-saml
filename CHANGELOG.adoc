@@ -3,6 +3,11 @@
 :toc-title: Versions
 :toclevels: 2
 
+== v1.18.1.3 — 2026-07-28
+
+* Rename the shard `crystal-saml` → `saml` (drop the `crystal-` prefix; the `aloli-crystal` org already carries the "Crystal" context).
+* Rename the entry shim `src/crystal-saml.cr` → `src/saml.cr` and the CLI source `bin/crystal-saml` → `bin/saml` (module `CrystalSaml` and API unchanged).
+
 == v1.18.1.1 — 2026-04-22
 
 * Add the *ameba* linter to the CI pipeline with a shared `.ameba.yml` config aligned with the Crystal ecosystem.

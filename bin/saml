@@ -8,7 +8,7 @@ config_file = ""
 response_data = ""
 
 parser = OptionParser.new do |p|
-  p.banner = "Usage: crystal-saml <command> [options]"
+  p.banner = "Usage: saml <command> [options]"
   p.separator ""
   p.separator "Commands:"
   p.separator "  metadata   Generate SP metadata XML"
@@ -33,7 +33,7 @@ parser = OptionParser.new do |p|
   end
 
   p.on("-v", "--version", "Show version") do
-    puts "crystal-saml #{CrystalSaml::VERSION} (ruby-saml upstream: #{CrystalSaml::UPSTREAM_VERSION})"
+    puts "saml #{CrystalSaml::VERSION} (ruby-saml upstream: #{CrystalSaml::UPSTREAM_VERSION})"
     exit
   end
 

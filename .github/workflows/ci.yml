@@ -34,4 +34,4 @@ jobs:
         run: bin/ameba
 
       - name: Build CLI
-        run: crystal build bin/crystal-saml -o crystal-saml-cli
+        run: crystal build bin/saml -o saml-cli

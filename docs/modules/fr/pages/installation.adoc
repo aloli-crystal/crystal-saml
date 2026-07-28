@@ -5,9 +5,9 @@ Ajoutez la dependance dans votre `shard.yml` :
 [source,yaml]
 ----
 dependencies:
-  crystal-saml:
-    github: aloli-crystal/crystal-saml
-    version: ~> 1.18.1
+  saml:
+    github: aloli-crystal/saml
+    version: ~> 1.18.1.3
 ----
 
 Lancez `shards install`.

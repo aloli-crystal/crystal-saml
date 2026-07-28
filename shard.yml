@@ -1,5 +1,5 @@
-name: crystal-saml
-version: 1.18.1.2
+name: saml
+version: 1.18.1.3
 description: |
   SAML v2 toolkit for Crystal. Add SSO to your Crystal applications.
   Port of the ruby-saml gem (v1.18.1).

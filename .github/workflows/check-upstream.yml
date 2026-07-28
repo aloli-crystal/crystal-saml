@@ -33,7 +33,7 @@ jobs:
             const latest = '${{ steps.check.outputs.latest }}';
             const current = '${{ steps.check.outputs.current }}';
             const title = `Upstream ruby-saml updated to v${latest}`;
-            const body = `The upstream ruby-saml gem has been updated to v${latest}.\nCurrent crystal-saml tracks v${current}.\n\nPlease review the changes: https://github.com/SAML-Toolkits/ruby-saml/releases`;
+            const body = `The upstream ruby-saml gem has been updated to v${latest}.\nCurrent saml tracks v${current}.\n\nPlease review the changes: https://github.com/SAML-Toolkits/ruby-saml/releases`;
 
             // Check if issue already exists
             const issues = await github.rest.issues.listForRepo({
